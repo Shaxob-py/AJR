@@ -1,8 +1,7 @@
 import asyncio
-from asyncio import run
 from datetime import datetime
 
-from sqlalchemy import create_engine, String, DateTime, ForeignKey, Integer, BIGINT, UniqueConstraint, Index
+from sqlalchemy import create_engine, String, DateTime, ForeignKey, Integer, BIGINT, UniqueConstraint, Index,DECIMAL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 engine = create_engine("postgresql+psycopg2://postgres:1@localhost:5432/academy")
@@ -22,22 +21,49 @@ async_session_maker = async_sessionmaker(
 class Customer(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    full_name: Mapped[str] = mapped_column(String,nullable=True)
+    owm_name: Mapped[str] = mapped_column(String,nullable=True)
     username: Mapped[str] = mapped_column(String,nullable=True)
     name: Mapped[str] = mapped_column(String,nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
-    phone_number: Mapped[int] = mapped_column(Integer,nullable=True)
+    phone_number: Mapped[int] = mapped_column(String,nullable=True)
     location : Mapped[str]=mapped_column(String,nullable=True)
 
     async def save(self, session: AsyncSession):
         session.add(self)
         await session.commit()
-#
-# class Group(Base):
-#     __tablename__ = "groups"
-#     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)  # chat_id
-#     title: Mapped[str] = mapped_column(String)
-#     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class BasePayment(Base):
+    __abstract__ = True
+    id: Mapped[int] = mapped_column(BIGINT, autoincrement=True, primary_key=True)
+    pay: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=False)
+    user_id: Mapped[int] = mapped_column(BIGINT)
+    paid: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    status: Mapped[str] = mapped_column(String, nullable=True)
+    location: Mapped[str] = mapped_column(String, nullable=True)
+    coordinates: Mapped[str] = mapped_column(String, nullable=True)
+    phone_number: Mapped[str] = mapped_column(String, nullable=True)
+
+class Payment(BasePayment):
+    __tablename__ = "payments"
+
+class DailyPayment(BasePayment):
+    __tablename__ = "daily_payment"
+
+class DailyInfo(Base):
+    __tablename__ = "daily_info"
+    id: Mapped[int] = mapped_column(BIGINT, autoincrement=True, primary_key=True)
+    phone_number: Mapped[str] = mapped_column(String)
+
+
+
+
+
+
+class Admin(Base):
+    __tablename__ = "admins"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    name: Mapped[str] = mapped_column(String,nullable=True)
+    password : Mapped[str]=mapped_column(String,nullable=True)
+
 #
 # class GroupUser(Base):
 #     __tablename__ = "group_users"

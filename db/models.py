@@ -1,11 +1,8 @@
 import asyncio
 from datetime import datetime
-
 from sqlalchemy import create_engine, String, DateTime, ForeignKey, Integer, BIGINT, UniqueConstraint, Index,DECIMAL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
-engine = create_engine("postgresql+psycopg2://postgres:1@localhost:5432/academy")
-DATABASE_URL = "postgresql+asyncpg://postgres:1@localhost:5432/academy"
 Base = declarative_base()
 
 async_engine = create_async_engine(
@@ -83,12 +80,6 @@ class Admin(Base):
     password: Mapped[str] = mapped_column(String, nullable=True)
     product_price: Mapped[int] = mapped_column(Integer, nullable=True)
 
-
-
-
-
-
-# ===================== Admin =====================
 
 async def init_models():
     async with async_engine.begin() as conn:

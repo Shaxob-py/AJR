@@ -23,3 +23,8 @@ class AdminState(StatesGroup):
     successfully_register = State()
     change_password_state = State()
     confirm_password_state = State()
+    invalid_password = State()
+    logout_admin = State()
+    change_prise = State()
+    message_all_state = State()
+

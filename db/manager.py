@@ -1,7 +1,10 @@
+import asyncio
 from mailbox import Message
 from sqlalchemy import select, update
 import httpx
 from sqlalchemy.dialects.postgresql import insert
+
+from bot.despecher.config import bot
 from db.models import async_session_maker, Customer
 
 
@@ -24,7 +27,6 @@ async def get_location_data(lat: float, lon: float):
     url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=18&addressdetails=1&accept-language=uz,en"
     async with httpx.AsyncClient(headers={"User-Agent": "MyTelegramBot/1.0"}, timeout=5.0) as client:
         return (await client.get(url)).json()
-
 
 async def location_funk(message: Message):
     lat, lon = message.location.latitude, message.location.longitude
@@ -58,19 +60,28 @@ async def update_user_contact(message):
         )
         await session.commit()
 
-async def insert_users_if_not_exist(users: list[dict]):
+
+async def insert_users_if_not_exist(user_id: int, name, username):
     async with async_session_maker() as session:
         stmt = (
             insert(Customer)
-            .values([
-                {
-                    "id": user["id"],
-                    "username": user["username"],
-                    "name": user["name"],
-                    "phone_number": None
-                } for user in users
-            ])
-            .on_conflict_do_nothing(index_elements=['id'])
+            .values(id=user_id, name=name, username=username)
+            .on_conflict_do_nothing(index_elements=['id'])  # id = primary key
         )
         await session.execute(stmt)
-        await session.commit()
+        await session   .commit()
+
+
+async def stream_customer_ids() -> list[int]:
+    async with async_session_maker() as session:
+        result = await session.execute(select(Customer.id))
+        all_ids = result.scalars().all()
+        return all_ids
+
+async def send_message(user_id: int, text: str):
+    try:
+        await bot.send_message(user_id, text)
+    except Exception as e:
+        print(f"Xatolik user {user_id}: {e}")
+
+

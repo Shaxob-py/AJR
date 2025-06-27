@@ -17,91 +17,78 @@ async_session_maker = async_sessionmaker(
     class_=AsyncSession,
  expire_on_commit=False,
 )
-
 class Customer(Base):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    owm_name: Mapped[str] = mapped_column(String,nullable=True)
-    username: Mapped[str] = mapped_column(String,nullable=True)
-    name: Mapped[str] = mapped_column(String,nullable=True)
-    phone_number: Mapped[int] = mapped_column(String,nullable=True)
-    location : Mapped[str]=mapped_column(String,nullable=True)
 
-    async def save(self, session: AsyncSession):
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    owm_name: Mapped[str] = mapped_column(String, nullable=True)
+    username: Mapped[str] = mapped_column(String, nullable=True)
+    name: Mapped[str] = mapped_column(String, nullable=True)
+    phone_number: Mapped[str] = mapped_column(String, nullable=True)
+    location: Mapped[str] = mapped_column(String, nullable=True)
+
+    payments: Mapped[list["Payment"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    daily_info: Mapped[list["DailyInfo"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    daily_payments: Mapped[list["DailyPayment"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+    async def save(self, session):
         session.add(self)
         await session.commit()
 
+# ===================== Base Payment =====================
 class BasePayment(Base):
     __abstract__ = True
-    id: Mapped[int] = mapped_column(BIGINT, autoincrement=True, primary_key=True)
+
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
     pay: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=False)
-    user_id: Mapped[int] = mapped_column(BIGINT)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     paid: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     status: Mapped[str] = mapped_column(String, nullable=True)
     location: Mapped[str] = mapped_column(String, nullable=True)
-    coordinates: Mapped[str] = mapped_column(String, nullable=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=True)
 
+# ===================== Payment =====================
 class Payment(BasePayment):
     __tablename__ = "payments"
+    user: Mapped["Customer"] = relationship(back_populates="payments")
 
+# ===================== Daily Payment =====================
 class DailyPayment(BasePayment):
-    __tablename__ = "daily_payment"
+    __tablename__ = "daily_payments"
+    user: Mapped["Customer"] = relationship(back_populates="daily_payments")
 
+# ===================== Daily Info =====================
 class DailyInfo(Base):
     __tablename__ = "daily_info"
-    id: Mapped[int] = mapped_column(BIGINT, autoincrement=True, primary_key=True)
-    phone_number: Mapped[str] = mapped_column(String)
 
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    info: Mapped[str] = mapped_column(String, nullable=True)
+    phone_number: Mapped[str] = mapped_column(String, nullable=True)
 
+    user: Mapped["Customer"] = relationship(back_populates="daily_info")
 
-
-
-
+# ===================== Admin =====================
 class Admin(Base):
     __tablename__ = "admins"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    name: Mapped[str] = mapped_column(String,nullable=True)
-    password : Mapped[str]=mapped_column(String,nullable=True)
+    name: Mapped[str] = mapped_column(String, nullable=True)
+    password: Mapped[str] = mapped_column(String, nullable=True)
+    product_price: Mapped[int] = mapped_column(Integer, nullable=True)
 
-#
-# class GroupUser(Base):
-#     __tablename__ = "group_users"
-#     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-#     user_id: Mapped[int] = mapped_column(BIGINT)
-#     group_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("groups.id"))
-#     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-#     user_name : Mapped[str]=mapped_column(String,nullable=True)
-#     name : Mapped[str]=mapped_column(String,nullable=True)
-#     group = relationship("Group")
-#     count: Mapped[int] = mapped_column(BIGINT, default=0)
-#
-#     __table_args__ = (
-#         Index("idx_groupuser_user_group", "user_id", "group_id"),)
-# #
-# class GroupUserSeven(Base):
-#     __tablename__ = "group_users_seven"
-#     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-#     user_id: Mapped[int] = mapped_column(BIGINT)
-#     group_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("groups.id"))
-#     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-#     user_name: Mapped[str] = mapped_column(String, nullable=True)
-#     name: Mapped[str] = mapped_column(String, nullable=True)
-#     group = relationship("Group")
-#     count: Mapped[int] = mapped_column(BIGINT, default=0)
-#
-#     __table_args__ = (
-#         Index("idx_groupuser_seven_user_group", "user_id", "group_id"),)
-#
-# class GroupUserMessage(Base):
-#     __tablename__ = "group_user_messages"
-#     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-#     group_id:Mapped[int] = mapped_column(BIGINT, ForeignKey("groups.id"))
-#     group_user_id: Mapped[int] = mapped_column(ForeignKey("group_users.id"))
-#     message_text: Mapped[str] = mapped_column(String)
-#     __table_args__ = (
-#         UniqueConstraint("group_user_id", "message_text", name="uix_group_user_msg"),
-#         Index("idx_gum_group_user", "group_user_id"),)
+
+
+
+
+
+# ===================== Admin =====================
 
 async def init_models():
     async with async_engine.begin() as conn:

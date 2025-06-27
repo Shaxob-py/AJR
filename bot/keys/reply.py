@@ -1,8 +1,9 @@
 from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from bot.teksts.teksts import spend_number, back, phone_change, name, data, change_password, price_exchange, message_all, \
-    all_users, all_payments, all_daily
+from bot.teksts.teksts import spend_number, back, phone_change, name, data, change_password, price_exchange, \
+    message_all, \
+    all_users, all_payments, all_daily, logout
 
 
 def reply_button(buttons):
@@ -48,6 +49,7 @@ def admin_menu_button():
             KeyboardButton(text=change_password),
             KeyboardButton(text=price_exchange),
             KeyboardButton(text=message_all),
+            KeyboardButton(text = logout)
             )
     size = [1 ]
     rkb.adjust(*size)

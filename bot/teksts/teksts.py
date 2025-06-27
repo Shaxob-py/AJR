@@ -3,7 +3,7 @@ Bu yerda siz quyidagi imkoniyatlardan foydalanishingiz mumkin:
 
 📌 Ro'yxatdan o'tish  
 🎓 Xarid Qlish
-📞 Admin bilan bog'lanish  
+📞 Bepul Mutahasis maslaxatini olishingiz mumkun  
 💳 To‘lov qilish  
 ❓ Savol berish
 
@@ -23,7 +23,7 @@ back = "Ortga 🔙"
 location_spend = 'Buyurtmani davom ettirish uchun iltimos lokatsiyangizni yuboring'
 confirmation = 'Tasdiqlaysizmi ❔'
 pay = 'Tolov hozir'
-main_menu = 'Asosiy menu'
+main_menu_back = 'Asosiy menu'
 for_pay = 'Tolov uchun 👇'
 change = 'Nima ozgartirmoqchisiz 🔄'
 phone_change = 'Telefon'
@@ -37,20 +37,26 @@ BaarakAllohu fiikum!'''
 pay_later = 'Kelgandan sog 🚚'
 product_info = 'Mahsulot malumoti ✅'
 my_order = 'Buyurtmalarim 🛒'
-create_at = 'Sotib olingan sana 📅'
+create_at = 'Sotib olingan sana'
 status_payment = 'Tolov usuli'
 product_not_found = "Siz xali buyurtma bermadingiz 😞"
 paid = 'Qilingan tolov'
-data = 'Malumotlar'
-price_exchange = 'Narx almashtirish'
-change_password = 'Parol ozgartirish'
-message_all = 'Xammaga xabar yuborish'
+data = 'Malumotlar 📑'
+price_exchange = 'Narx almashtirish 💴'
+change_password = 'Parol ozgartirish 🔒'
+message_all = 'Xammaga xabar yuborish 👥'
 wrong_password = 'Xato'
-welcome_admin = 'Admin paeliga xsuh kelibsiz'
+welcome_admin = 'Admin paneliga xsuh kelibsiz'
 choice_data = 'Qanday malumot kerak 📂'
 all_users = 'Barcha faydalanuvchilar 👥'
 all_payments = 'Barcha tolov qilganlar 💸'
 all_daily = 'Barcha bugun tolov qilganlar 💸'
 warning_change_password = '‼️Ogoxlantirish qoyayotgan parolingiz esingizda qolsin‼️'
-changing_password = 'Yangi parolingiz kriting'
-return_password = 'Qayda kriting 🔄'
+changing_password = 'Yangi parolingiz kriting 🔒'
+return_password = 'Qayta kriting 🔄'
+logout = 'Admin panelidan chiqish 🔚'
+main_menu = '''Buyurtma berishni boshlash uchun 🛍 Buyurtma berish tugmasini bosing
+Shuningdek, bepul mutaxasis maslaxatini olishingiz mumkun mumkin'''
+correct_form_to_pay = 'Narxni togri shakilda kriting masalan 👉 50000 '
+in_valid_digit = 'Xato son krottingiz sonlar 4 xonali bolsin'
+input_message = 'Xabarni kriting'

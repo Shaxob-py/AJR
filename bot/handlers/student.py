@@ -1,16 +1,14 @@
-from datetime import datetime
-
 from aiogram import Dispatcher, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, InlineQueryResultArticle, InlineQuery, InputTextMessageContent
 from aiogram.types import LabeledPrice, PreCheckoutQuery
+from sqlalchemy.orm import joinedload
 
-# from bot.aditional import user_exists, mark_user_as_seen
 from bot.main import bot
-from db.manager import  insert_users_if_not_exist
-from db.manager import  location_funk, update_user_contact
-from db.models import Customer, async_session_maker, Payment, DailyPayment, DailyInfo
+from db.manager import insert_users_if_not_exist
+from db.manager import location_funk, update_user_contact
+from db.models import Customer, async_session_maker, Payment, DailyPayment, DailyInfo, Admin
 from bot.teksts.question import faq_lists
 from bot.despecher.state import CustomerState
 from bot.keys.inliny import search_inline_keyboard
@@ -18,8 +16,8 @@ from bot.keys.reply import reply_button, phone_number, location_button, settings
 from bot.teksts.teksts import back, buy, question, free_consultation, settings, start, phone, confirmation, \
     location_spend, \
     pay, \
-    main_menu, change, name, spend_name, successful, get_question, pay_later, product_info, my_order, create_at, \
-    product_not_found, paid
+    main_menu_back, change, name, spend_name, successful, get_question, pay_later, product_info, my_order, create_at, \
+    product_not_found, paid, main_menu
 from decimal import Decimal
 from bot.despecher import config
 from sqlalchemy.future import select
@@ -27,38 +25,34 @@ from sqlalchemy.future import select
 dp = Dispatcher()
 PAYMENT_PROVIDER_TOKEN = config.PAYMENT_PROVIDER_TOKEN
 
-
-@dp.message(CustomerState.consultation_state, F.text == back)
-@dp.message(CustomerState.pay_state, F.text == main_menu)
-@dp.message(CustomerState.settings_state, F.text == back)
-@dp.message(CustomerState.phone_state, F.text == back)
 @dp.message(Command("start"))
-async def command_start_handler(message: Message,state: FSMContext) -> None:
-    starttt= datetime.now()
-    user_id:int = message.from_user.id
-    username = message.from_user.username
-    name = message.from_user.first_name
+async def command_start_handler(message: Message, state: FSMContext) -> None:
     btns = [buy, my_order, product_info, question, free_consultation, settings]
     markab = reply_button(btns)
     await message.answer_photo(
-        photo="https://ibb.co/xt2frV4n",
+        photo="AgACAgQAAxkBAAECqDtoTbsXxEYoXE092i4gJDLY1DE6IwACmrkxG7oZDFLF4sI0k19HyQEAAwIAA3MAAzYE",
         caption=start,
         reply_markup=markab)
-    current_state = await state.get_state()
-    if current_state is None:
-        await insert_users_if_not_exist([
-            {
-                "id": user_id,
-                "username": username,
-                "name": name
-            }
-        ])
-        await state.set_state(CustomerState.register)
-    end = datetime.now()
-    print(end-starttt)
+    data = await state.get_data()
+    register = data.get('register')
 
 
+    if register is None:
+        user_id: int = message.from_user.id
+        username = message.from_user.username
+        name = message.from_user.first_name
+        await insert_users_if_not_exist(user_id, name, username)
+        await state.update_data(register=True)
 
+
+@dp.message(CustomerState.consultation_state, F.text == back)
+@dp.message(CustomerState.pay_state, F.text ==main_menu_back )
+@dp.message(CustomerState.settings_state, F.text == back)
+@dp.message(CustomerState.phone_state, F.text == back)
+async def menu_handler(message: Message) -> None:
+    btns = [buy, my_order, product_info, question, free_consultation, settings]
+    markab = reply_button(btns)
+    await message.answer(main_menu,reply_markup=markab)
 
 @dp.message(F.text == product_info)
 async def product_info_handler(message: Message) -> None:
@@ -109,6 +103,7 @@ async def inline_query_handler(inline_query: InlineQuery):
     # !!! To'g'ri joy — sikldan keyin javob berish
     await inline_query.answer(result, cache_time=5, is_personal=True)
 
+
 @dp.message(F.via_bot)
 async def chosen_result_handler(message: Message):
     question_id = message.text.strip()
@@ -123,6 +118,7 @@ async def chosen_result_handler(message: Message):
 
         await message.answer(caption, parse_mode="HTML")
 
+
 @dp.message(F.text == free_consultation)
 async def admin_handler(message: Message, state: FSMContext):
     await message.answer(phone, reply_markup=phone_number())
@@ -133,7 +129,8 @@ async def admin_handler(message: Message, state: FSMContext):
 async def contact_handler(message: Message, state: FSMContext):
     async with async_session_maker() as session:
         new_daily_info = DailyInfo(
-            phone_number=message.contact.phone_number, )
+            phone_number=message.contact.phone_number,
+                user_id  = message.from_user.id,)
         session.add(new_daily_info)
         await session.commit()
         await state.clear()
@@ -179,7 +176,7 @@ async def settings_handler(message: Message):
     await message.answer(successful, reply_markup=markab)
 
 
-@dp.message(CustomerState.location, F.text == "no")
+@dp.message(CustomerState.location, F.text == "yoq")
 @dp.message(F.text == back, CustomerState.location_state)
 @dp.message(F.text == buy)
 async def buy_handler(message: Message, state: FSMContext):
@@ -199,15 +196,15 @@ async def location_handler(message: Message, state: FSMContext):
 async def location_handler(message: Message, state: FSMContext):
     await location_funk(message)
     await state.update_data(latitude=message.location.latitude, longitude=message.location.longitude)
-    await message.answer(confirmation, reply_markup=reply_button(['yes', 'no']))
+    await message.answer(confirmation, reply_markup=reply_button(['xa', 'yoq']))
     await state.set_state(CustomerState.location)
 
 
-@dp.message(CustomerState.location, F.text == "yes")
-async def yes_location_handler(message: Message, state: FSMContext):
-    markab = reply_button([pay, main_menu, pay_later])
-    await message.answer('Tolovingiz 50.0000 UZS sum ', reply_markup=markab)
+@dp.message(CustomerState.location, F.text == "xa")
+async def yes_location_handler(message : Message,state: FSMContext):
+    markab = reply_button([pay, pay_later,main_menu ])
     await state.set_state(CustomerState.pay_state)
+    await message.answer('✅', reply_markup=markab)
 
 
 @dp.message(CustomerState.pay_state, F.text == pay_later)
@@ -225,10 +222,9 @@ async def pay_later_handler(message: Message, state: FSMContext):
             status="processing",
             pay=0  # noqa
         )
-
         session.add(new_payment)
         await session.commit()
-        btns = [buy, question, free_consultation, settings]
+        btns = [buy, my_order, product_info, question, free_consultation, settings]
         markab = reply_button(btns)
         await message.answer("✅ To‘lov muvaffaqiyatli amalga oshirildi. Rahmat!", reply_markup=markab)
 
@@ -236,7 +232,9 @@ async def pay_later_handler(message: Message, state: FSMContext):
 @dp.message(CustomerState.pay_state, F.text == pay)
 async def pay_handler(message: Message):
     await message.answer('Tolov uchun ', reply_markup=ReplyKeyboardRemove())
-
+    async with async_session_maker() as session:
+        result = await session.execute(select(Admin))
+        admin = result.scalar()
     await bot.send_invoice(
         chat_id=message.chat.id,
         title="Qora sedana",
@@ -244,7 +242,7 @@ async def pay_handler(message: Message):
         payload="products",
         provider_token=config.PAYMENT_PROVIDER_TOKEN,
         currency="UZS",
-        prices=[LabeledPrice(label="Qora sedana", amount=50000 * 100)],
+        prices=[LabeledPrice(label="Qora sedana", amount=admin.product_price * 100)],
         start_parameter="premium-subscription"
     )
 
@@ -294,13 +292,15 @@ async def successful_payment(message: Message, state: FSMContext):
 async def my_orders(message: Message):
     async with async_session_maker() as session:
         result = await session.execute(
-            select(Payment).where(Payment.user_id == message.from_user.id)
+            select(Payment)
+            .options(joinedload(Payment.user))  # ⏩ JOIN bilan yuklash
+            .where(Payment.user_id == message.from_user.id)
         )
         payments = result.scalars().all()
         if payments:
-            text = ""
+            text = f"{create_at}        {paid}\n"
             for payment in payments:
-                text += f"{create_at} : {payment.paid.strftime('%Y-%m-%d %H:%M')}.  {paid} : {payment.pay} so'm\n"
+                text += f" {payment.paid.strftime('%Y-%m-%d %H:%M')}            {payment.pay} so'm\n"
             await message.answer(text)
         else:
             await message.answer(product_not_found)

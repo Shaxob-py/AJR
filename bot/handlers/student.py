@@ -28,11 +28,11 @@ PAYMENT_PROVIDER_TOKEN = config.PAYMENT_PROVIDER_TOKEN
 @dp.message(Command("start"))
 async def command_start_handler(message: Message, state: FSMContext) -> None:
     btns = [buy, my_order, product_info, question, free_consultation, settings]
-    markab = reply_button(btns)
+    markup = reply_button(btns)
     await message.answer_photo(
         photo="AgACAgQAAxkBAAECqDtoTbsXxEYoXE092i4gJDLY1DE6IwACmrkxG7oZDFLF4sI0k19HyQEAAwIAA3MAAzYE",
         caption=start,
-        reply_markup=markab)
+        reply_markup=markup)
     data = await state.get_data()
     register = data.get('register')
 
@@ -51,8 +51,8 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
 @dp.message(CustomerState.phone_state, F.text == back)
 async def menu_handler(message: Message) -> None:
     btns = [buy, my_order, product_info, question, free_consultation, settings]
-    markab = reply_button(btns)
-    await message.answer(main_menu,reply_markup=markab)
+    markup = reply_button(btns)
+    await message.answer(main_menu,reply_markup=markup)
 
 @dp.message(F.text == product_info)
 async def product_info_handler(message: Message) -> None:
@@ -135,15 +135,15 @@ async def contact_handler(message: Message, state: FSMContext):
         await session.commit()
         await state.clear()
         btns = [buy, my_order, product_info, question, free_consultation, settings]
-        markab = reply_button(btns)
-        await message.answer(successful, reply_markup=markab)
+        markup = reply_button(btns)
+        await message.answer(successful, reply_markup=markup)
 
 
 @dp.message(F.text == settings)
 async def buy_handler(message: Message, state: FSMContext):
-    markab = settings_button()
+    markup = settings_button()
     await state.set_state(CustomerState.settings_state)
-    await message.answer(change, reply_markup=markab)
+    await message.answer(change, reply_markup=markup)
 
 
 @dp.message(CustomerState.settings_state, F.text == name)
@@ -164,16 +164,16 @@ async def change_name_handler(message: Message, state: FSMContext):
         await session.commit()
         await state.clear()
         btns = [buy, my_order, product_info, question, free_consultation, settings]
-        markab = reply_button(btns)
-        await message.answer(successful, reply_markup=markab)
+        markup = reply_button(btns)
+        await message.answer(successful, reply_markup=markup)
 
 
 @dp.message(CustomerState.settings_state, F.contact)
 async def settings_handler(message: Message):
     await update_user_contact(message)
     btns = [buy, my_order, product_info, question, free_consultation, settings]
-    markab = reply_button(btns)
-    await message.answer(successful, reply_markup=markab)
+    markup = reply_button(btns)
+    await message.answer(successful, reply_markup=markup)
 
 
 @dp.message(CustomerState.location, F.text == "yoq")
@@ -202,9 +202,9 @@ async def location_handler(message: Message, state: FSMContext):
 
 @dp.message(CustomerState.location, F.text == "xa")
 async def yes_location_handler(message : Message,state: FSMContext):
-    markab = reply_button([pay, pay_later,main_menu ])
+    markup = reply_button([pay, pay_later,main_menu ])
     await state.set_state(CustomerState.pay_state)
-    await message.answer('✅', reply_markup=markab)
+    await message.answer('✅', reply_markup=markup)
 
 
 @dp.message(CustomerState.pay_state, F.text == pay_later)
@@ -225,8 +225,8 @@ async def pay_later_handler(message: Message, state: FSMContext):
         session.add(new_payment)
         await session.commit()
         btns = [buy, my_order, product_info, question, free_consultation, settings]
-        markab = reply_button(btns)
-        await message.answer("✅ To‘lov muvaffaqiyatli amalga oshirildi. Rahmat!", reply_markup=markab)
+        markup = reply_button(btns)
+        await message.answer("✅ To‘lov muvaffaqiyatli amalga oshirildi. Rahmat!", reply_markup=markup)
 
 
 @dp.message(CustomerState.pay_state, F.text == pay)
@@ -256,8 +256,8 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
 async def successful_payment(message: Message, state: FSMContext):
     if message.successful_payment.invoice_payload == "products":
         btns = [buy, my_order, product_info, question, free_consultation, settings]
-        markab = reply_button(btns)
-        await message.answer("✅ To‘lov muvaffaqiyatli amalga oshirildi. Rahmat!", reply_markup=markab)
+        markup = reply_button(btns)
+        await message.answer("✅ To‘lov muvaffaqiyatli amalga oshirildi. Rahmat!", reply_markup=markup)
         data = await state.get_data()
         phone_ = data.get('phone')
         user_id = data.get('id')

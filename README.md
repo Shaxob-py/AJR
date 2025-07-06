@@ -1,4 +1,4 @@
-# AJR
+# AJRbot
 <h1 align="center">🌿 AjrQoraSedan Bot</h1>
 
 <p align="center">

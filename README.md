@@ -241,30 +241,6 @@ We welcome contributions! Please follow these steps:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-## 👥 Team
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="https://github.com/yourusername.png" width="100px;" alt="Developer"/>
-      <br>
-      <sub><b>Your Name</b></sub>
-      <br>
-      <sub>Lead Developer</sub>
-    </td>
-    <td align="center">
-      <img src="https://github.com/contributor.png" width="100px;" alt="Contributor"/>
-      <br>
-      <sub><b>Contributor Name</b></sub>
-      <br>
-      <sub>Backend Developer</sub>
-    </td>
-  </tr>
-</table>
-
----
 
 ## 📞 Support
 

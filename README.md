@@ -270,8 +270,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 
-- 📧 Email: support@ajrqorasedan.com
-- 💬 Telegram: [@AjrQoraSedan_Support](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/shaxob_x)
+  [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:xunuddinovshaxob@gmail.com)
+  [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/shaxob_x)
 - 🐛 Issues: [GitHub Issues](https://github.com/Shaxobff/ajrqorasedan/issues)
 
 

@@ -27,4 +27,4 @@ class AdminState(StatesGroup):
     logout_admin = State()
     change_prise = State()
     message_all_state = State()
-
+    data = State()
